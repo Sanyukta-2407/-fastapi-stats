@@ -1,24 +1,25 @@
 from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 import uuid
 import time
 
 app = FastAPI()
 
+# Allowed CORS origin
 ALLOWED_ORIGIN = "https://dash-zk8zhh.example.com"
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[ALLOWED_ORIGIN],
     allow_credentials=False,
-    allow_methods=["GET", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
 EMAIL = "22f2001139@ds.study.iitm.ac.in"
 
 
+# Middleware to add required headers
 @app.middleware("http")
 async def add_headers(request: Request, call_next):
     start = time.perf_counter()
@@ -33,9 +34,18 @@ async def add_headers(request: Request, call_next):
     return response
 
 
+# Root endpoint
+@app.get("/")
+def root():
+    return {
+        "message": "FastAPI Stats Service is running"
+    }
+
+
+# Stats endpoint
 @app.get("/stats")
 def stats(values: str = Query(...)):
-    nums = [int(x) for x in values.split(",")]
+    nums = [int(x.strip()) for x in values.split(",")]
 
     return {
         "email": EMAIL,
